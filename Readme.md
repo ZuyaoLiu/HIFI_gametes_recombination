@@ -1,4 +1,21 @@
 # Identifying Cross Overs and Gene Covnerstions from gamete HIFI sequening (Revio platform).
+This script is designed to identify crossovers and gene conversion events from HiFi sequencing data (PacBio Revio platform) by comparing phased haploid assemblies and read alignments. It implements a series of stringent filtering steps on read mapping and SNP calling to ensure accurate detection of recombination signals.
+
+While originally developed for gamete sequencing (e.g. sperm), the workflow is generalizable and can also be applied to bulk sequencing data, such as cancer tumor samples, where distinguishing haplotype-specific variants and detecting recombination-like events is important for studying genomic instability and clonal evolution.
+
+Key features include:
+
+Scaffold and gap-extension of haploid assemblies relative to a reference genome.
+
+High-confidence read assignment to haplotypes, based on mapping quality, consistency, and error thresholds.
+
+SNP filtering based on alignment context, base quality, read coverage, and repeat masking.
+
+Identification of crossovers and gene conversions through haplotype-consistent read support.
+
+Generation of event classifications and alignments for downstream validation.
+
+This makes the script useful both for meiotic recombination studies (e.g. sperm sequencing to map crossover landscapes) and for somatic genome instability research (e.g. detecting recombination signatures in cancer genomes).
 
 
 ## What is the script doing?

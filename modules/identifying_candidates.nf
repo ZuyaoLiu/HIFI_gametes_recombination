@@ -86,7 +86,7 @@ process CLASSIFY_EVENTS{
     python ${classify_events_py_ch} ${final_filt} rec_events
     """
 }
-*/
+
 workflow IDENTIFYING_CANDIDATES{
     
     take:

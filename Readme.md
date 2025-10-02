@@ -29,7 +29,7 @@ This makes the workflow broadly useful for both:
    - Unique mappings, MAPQ = 60  
    - Consistent alignment to the same chromosome and strand across haplotypes  
 5. **Flag problematic reads** with:  
-   - >200 bp soft clipping (default), or  
+   - \>200 bp soft clipping (default), or  
    - >100 sequence errors (mismatches to both haplotypes)  
 6. **Filter SNPs** between haplotypes:  
    - At least 10 bp matched alignment flanking both sides  

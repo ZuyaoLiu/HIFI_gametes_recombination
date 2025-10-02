@@ -30,10 +30,10 @@ This makes the workflow broadly useful for both:
    - Consistent alignment to the same chromosome and strand across haplotypes  
 5. **Flag problematic reads** with:  
    - \>200 bp soft clipping (default), or  
-   - >100 sequence errors (mismatches to both haplotypes)  
+   - \>100 sequence errors (mismatches to both haplotypes)  
 6. **Filter SNPs** between haplotypes:  
    - At least 10 bp matched alignment flanking both sides  
-   - >400 bp away from read ends (Revio-specific)  
+   - \>400 bp away from read ends (Revio-specific)  
    - Base quality ≥ 40  
    - Outside low complexity or tandem repeat regions  
 7. **Assign haplotype** to each retained HiFi read  

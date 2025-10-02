@@ -33,8 +33,8 @@ process TRF{
     script:
 
     """
-    #trf ${fasta} 2 6 6 80 10 50 500 -ngs -h -l 10 > ${hap_name}.trf
-    #python ${script} --dat ${hap_name}.trf --out ${hap_name}.trf.bed --tool lobstr
+    trf ${fasta} 2 6 6 80 10 50 500 -ngs -h -l 10 > ${hap_name}.trf
+    python ${script} --dat ${hap_name}.trf --out ${hap_name}.trf.bed --tool lobstr
     touch ${hap_name}.trf.bed
     """
 }
@@ -74,12 +74,12 @@ process SNP_FILTER{
     #2. SNPs that were outsied 400bp of either read ends for the Revio data
     #3. has a baseQ 40
     #4. not located in sdust and trf beds
-
-    cat ${reads_assign} | head -n 1 > header
+    mkdir tmp
+    head -n 1 SNP.stats > header
     cat ${reads_assign} | awk ' \$18 == "True" && \$4 == 40 && \$3 >=400 && (\$2-\$3+1) >= 400 ' > SNP.step123.filt
 
-    cat SNP.step123.filt |cut -f 5,6|awk '{print \$1"\t"\$2-1"\t"\$2}'|sort -k1,1V -k2,2V -u > hap1.list
-    cat SNP.step123.filt |cut -f 8,9|awk '{print \$1"\t"\$2-1"\t"\$2}'|sort -k1,1V -k2,2V -u > hap2.list
+    cat SNP.step123.filt |cut -f 5,6|awk '{print \$1"\t"\$2-1"\t"\$2}'|sort -k1,1V -k2,2V -u  -T ./tmp> hap1.list
+    cat SNP.step123.filt |cut -f 8,9|awk '{print \$1"\t"\$2-1"\t"\$2}'|sort -k1,1V -k2,2V -u  -T ./tmp > hap2.list
 
     bedtools intersect -a hap1.list -b ${hap1_repeats} -v |cut  -f 1,3 > hap1.snp.kept
     bedtools intersect -a hap2.list -b ${hap2_repeats} -v |cut  -f 1,3 > hap2.snp.kept
@@ -87,7 +87,7 @@ process SNP_FILTER{
     awk 'NR==FNR {k[\$1 FS \$2]; next} (\$5 FS \$6) in k' hap1.snp.kept SNP.step123.filt > SNP.step1234.filt.hap1
     awk 'NR==FNR {k[\$1 FS \$2]; next} (\$8 FS \$9) in k' hap2.snp.kept SNP.step123.filt > SNP.step1234.filt.hap2
 
-    mkdir tmp
+   
     cat SNP.step1234.filt.hap1 SNP.step1234.filt.hap2 | \
         sort -k1,1V -k3,3V \
         -S 8G \

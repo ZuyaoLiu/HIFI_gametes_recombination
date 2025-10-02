@@ -33,9 +33,8 @@ if (params.help) {
 
 
  Profiles:
-   -profile standard   Run locally
-   -profile slurm      Run on HPC cluster
-   -profile docker     Run with Docker/Singularity
+   -profile local   Run locally
+   -profile slurm   Run on HPC cluster
 ================================================================================
 """
     exit 0

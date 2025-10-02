@@ -79,12 +79,12 @@ def classify_read(read_id, group):
            
 
 def main():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print("Usage: python script.py input_file.tsv output_prefix")
         sys.exit(1)
 
     input = sys.argv[1]
-    prefix = sys.argv[2]
+  
 
     df = pd.read_csv(input, sep="\t")
     df.sort_values(['read_id', 'SNP_pos_on_read'], inplace=True)
@@ -111,7 +111,7 @@ def main():
         results_df.loc[len(results_df)] = row
 
     results_df.sort_values(['CO1_hap1_chr', 'CO1_hap1_refpos'], inplace=True)
-    results_df.to_csv(f"{prefix}.rec_events.tsv", sep="\t", index=False)
+    results_df.to_csv(f"rec_events.tsv", sep="\t", index=False)
 
 if __name__ == "__main__":
     main()

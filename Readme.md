@@ -43,11 +43,17 @@ This makes the workflow broadly useful for both:
 
 ---
 
+## Environment Requirements
+
+- [Nextflow](https://github.com/nextflow-io/nextflow)  
+- Singularity/Apptainer or Conda (see conda_environment.yml)
+---
+
 ## Input Requirements
 
 - Two **contig-level haploid assemblies** (hap1 and hap2)  
 - **HiFi sequencing reads** (after QC)  
-- A **chromosome-level reference assembly**  
+- A **chromosome-level reference assembly**
 
 ---
 
@@ -60,11 +66,57 @@ This makes the workflow broadly useful for both:
 
 ---
 
-## Tips for Balanced Haploid Assemblies
+## Tips for Generating Balanced Haploid Assemblies
 
 - Aim for **similar BUSCO scores** between hap1 and hap2; avoid imbalance where possible.  
 - Fine-tune **hifiasm parameters** (`-s` and `--hom-cov`) to reduce collapse.  
 - Alternatively, use **purge_dups** iteratively:  
   - Deduplicate hap1 and move duplicates into hap2  
   - Re-deduplicate hap2  
-- This approach can **rescue over-collapsed contigs** and balance assembly completeness.  
+- This approach can **rescue over-collapsed contigs** and balance assembly completeness.
+
+
+## Running pipeline
+nextflow run main.nf 
+  --hifi input_hifi
+  --ref ref_assembly.fa  
+  --hap1 haploid_assembly_1.fa
+  --hap2 haploid_assembly_2.fa
+  --threads num_of_cpus(digits)
+  --profile standard or slurm
+  -c nextflow.config
+
+All the following files and folders **must be in the same working directory** for the pipeline to run correctly:
+project_directory/
+├── hifi_sperm_recomb.sif # Singularity image file
+├── main.nf               # Nextflow main workflow script
+├── modules/              # Workflow modules
+├── nextflow.config       # Nextflow configuration file
+└── scripts/              # Custom scripts
+
+
+## Parameters
+
+| Parameter         | Description                                                                 | Default / Required |
+|-------------------|-----------------------------------------------------------------------------|--------------------|
+| `--hifi`          | HiFi sequencing reads input file (FASTQ/FASTA after QC).                    | **Required**       |
+| `--ref`           | Chromosome-level reference assembly.                                        | **Required**       |
+| `--hap1`          | Haploid assembly 1 (hap1).                                                  | **Required**       |
+| `--hap2`          | Haploid assembly 2 (hap2).                                                  | **Required**       |
+| `--leng_N_Gap`    | Length (in bp) to extend gaps (N’s) in assemblies to avoid cross-gap mapping.| `30000`            |
+| `--soft_clip_num` | Maximum allowed soft-clipped bases per read; reads exceeding this are discarded. | `200`          |
+| `--threads`       | Number of CPU threads to use.                                               | `8`                |
+| `--help`          | Show the help message and exit.                                             | —                  |
+
+---
+
+## Profiles
+
+Execution profiles define how and where the pipeline runs:
+
+- **`-profile standard`**  
+  Run locally on the current machine. Suitable for small datasets or testing.
+
+- **`-profile slurm`**  
+  Run on an HPC cluster with **SLURM** workload manager. Suitable for large datasets or production runs.
+

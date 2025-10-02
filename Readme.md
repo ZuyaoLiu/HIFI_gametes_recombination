@@ -77,13 +77,15 @@ This makes the workflow broadly useful for both:
 
 
 ## Running pipeline
-nextflow run main.nf 
-  --hifi input_hifi
-  --ref ref_assembly.fa  
-  --hap1 haploid_assembly_1.fa
-  --hap2 haploid_assembly_2.fa
-  --threads num_of_cpus(digits)
-  --profile standard or slurm
+
+```bash
+nextflow run main.nf \
+  --hifi input_hifi \
+  --ref ref_assembly.fa \
+  --hap1 haploid_assembly_1.fa \
+  --hap2 haploid_assembly_2.fa \
+  --threads <num_of_cpus> \
+  --profile standard \
   -c nextflow.config
 
 All the following files and folders **must be in the same working directory** for the pipeline to run correctly:

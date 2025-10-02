@@ -87,14 +87,16 @@ nextflow run main.nf \
   --threads <num_of_cpus> \
   --profile standard \
   -c nextflow.config
-
+```
 All the following files and folders **must be in the same working directory** for the pipeline to run correctly:
+```bash
 project_directory/
 ├── hifi_sperm_recomb.sif # Singularity image file
 ├── main.nf               # Nextflow main workflow script
 ├── modules/              # Workflow modules
 ├── nextflow.config       # Nextflow configuration file
 └── scripts/              # Custom scripts
+```
 
 
 ## Parameters

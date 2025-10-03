@@ -47,7 +47,9 @@ The whole workflow is inspired by this paper: (https://www.biorxiv.org/content/1
 ## Environment Requirements
 
 - [Nextflow](https://github.com/nextflow-io/nextflow)  
-- Singularity/Apptainer or Conda (see conda_environment.yml)
+- Singularity/Apptainer (See release for SIF image)
+  or 
+- Conda (see conda_environment.yml)
 ---
 
 ## Input Requirements

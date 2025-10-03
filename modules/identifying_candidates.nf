@@ -101,7 +101,6 @@ workflow IDENTIFYING_CANDIDATES{
     
     main:
         chr           = SPLIT_CHR(snp_filtered).flatten() 
-        chr|view   
         snp_filtered_further        = SNP_FILTER_FURTHER( chr, filter_identify_candidates_py_ch)
                                         .collect(flat: false)
                                         .map { rows ->
@@ -110,7 +109,6 @@ workflow IDENTIFYING_CANDIDATES{
                                         def trans   = rows.collect { it[2] }
                                         tuple(dropped, filt, trans)
                                         }
-        snp_filtered_further|view            
         merged_filt    = MERGE_SNP_FILTER(snp_filtered_further)
                        .map{dropped, final_filt, trans -> final_filt}
         

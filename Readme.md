@@ -18,6 +18,7 @@ This makes the workflow broadly useful for both:
 - **Meiotic recombination studies** (e.g., sperm sequencing to map crossover landscapes)  
 - **Somatic genome instability research** (e.g., recombination signatures in cancer genomes)  
 
+The whole workflow is inspired by this paper: (https://www.biorxiv.org/content/10.1101/2024.07.05.602249v1.full)
 ---
 
 ## Workflow Overview

@@ -14,9 +14,11 @@ process SPLIT_CHR{
 
     """
     mkdir tmp
+    head -n 1 ${snp_filtered} > header
     for i in \$(cat ${snp_filtered} |cut -f 5|grep -v "hap1_chr"|sort -k1,1V -T ./tmp |uniq)
     do
-    awk -v x=\${i}  '\$5 == x' ${snp_filtered} > \${i}.SNP.filt.txt
+    awk -v x=\${i}  '\$5 == x' ${snp_filtered} > temp
+    cat header temp > \${i}.SNP.filt.txt
     done
     """
 }
@@ -25,7 +27,7 @@ process SNP_FILTER_FURTHER{
     label "identify_candidates"
     
     input:
-        tuple path(chr), path(snp_filtered)
+        path(chr)
         path(filter_identify_candidates_py_ch)
     
     output:
@@ -34,7 +36,7 @@ process SNP_FILTER_FURTHER{
     script:
         
     """
-    python ${filter_identify_candidates_py_ch} ${snp_filtered} ${chr}
+    python ${filter_identify_candidates_py_ch} ${chr} ${chr}
     """
 }
 
@@ -98,8 +100,8 @@ workflow IDENTIFYING_CANDIDATES{
         
     
     main:
-        chr           = SPLIT_CHR(snp_filtered).flatten()    
-        snp_filtered_further        = SNP_FILTER_FURTHER( chr.combine(snp_filtered), filter_identify_candidates_py_ch)
+        chr           = SPLIT_CHR(snp_filtered).flatten() 
+        snp_filtered_further        = SNP_FILTER_FURTHER( chr, filter_identify_candidates_py_ch)
                                         .collect(flat: false)
                                         .map { rows ->
                                         def dropped = rows.collect { it[0] }
@@ -107,7 +109,6 @@ workflow IDENTIFYING_CANDIDATES{
                                         def trans   = rows.collect { it[2] }
                                         tuple(dropped, filt, trans)
                                         }
-                    
         merged_filt    = MERGE_SNP_FILTER(snp_filtered_further)
                        .map{dropped, final_filt, trans -> final_filt}
         

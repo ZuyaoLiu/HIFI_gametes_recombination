@@ -3,29 +3,24 @@ import pandas as pd
 from dataclasses import dataclass
 
 def haplotype_assignment(df, group_col):
-    #Calculate haplotype stats and assign reads
-    grouped = df.groupby(group_col)
+    cols = [group_col, "hap1_ratio", "hap2_ratio"]
+    if df is None or len(df) == 0:
+        return pd.DataFrame(columns=cols)
 
+    grouped = df.groupby(group_col, sort=False)
     results = []
-    
     for key, group in grouped:
-        hap1_count = 0
-        hap2_count = 0
-        for _, row in group.iterrows():
-            if row["which_hap_matches"] == "hap1":
-                hap1_count += 1
-            elif row["which_hap_matches"] == "hap2":
-                hap2_count += 1
-                
-        hap1_ratio = hap1_count/(hap1_count + hap2_count)
-        hap2_ratio = hap2_count/(hap1_count + hap2_count)
-        
-        results.append({
-            group_col: key,
-            "hap1_ratio": hap1_ratio,
-            "hap2_ratio": hap2_ratio
-        })
-    return pd.DataFrame(results)
+        hap1_count = (group["which_hap_matches"] == "hap1").sum()
+        hap2_count = (group["which_hap_matches"] == "hap2").sum()
+        denom = hap1_count + hap2_count
+        if denom > 0:
+            hap1_ratio = hap1_count / denom
+            hap2_ratio = hap2_count / denom
+        else:
+            hap1_ratio = float("nan")
+            hap2_ratio = float("nan")
+        results.append({group_col: key, "hap1_ratio": hap1_ratio, "hap2_ratio": hap2_ratio})
+    return pd.DataFrame(results, columns=cols)
         
         
 
@@ -66,13 +61,17 @@ def filter_SNP_using_pure_reads(pure_reads_hap1, pure_reads_hap2, df, group_col)
 
 
 def identify_candidate_reads(reads_kept_assign, df_kept):
-    candidates = reads_kept_assign[(reads_kept_assign["hap1_ratio"] > 0.05) &
-        (reads_kept_assign["hap1_ratio"] < 0.95) &
-        (reads_kept_assign["hap2_ratio"] > 0.05) &
-        (reads_kept_assign["hap2_ratio"] < 0.95)]
-
-    df_kept["is_candidate"] = df_kept["read_id"].isin(candidates["read_id"])
-    return df_kept
+    df_out = df_kept.copy()
+    if reads_kept_assign is None or not {"hap1_ratio","hap2_ratio"}.issubset(reads_kept_assign.columns):
+        df_out["is_candidate"] = False
+        return df_out
+    candidates = reads_kept_assign.dropna(subset=["hap1_ratio","hap2_ratio"])
+    candidates = candidates[
+        (candidates["hap1_ratio"] > 0.05) & (candidates["hap1_ratio"] < 0.95) &
+        (candidates["hap2_ratio"] > 0.05) & (candidates["hap2_ratio"] < 0.95)
+    ]
+    df_out["is_candidate"] = df_out["read_id"].isin(candidates["read_id"])
+    return df_out
 
 
 @dataclass
@@ -253,6 +252,36 @@ def main():
 
     print("Keep confident SNPs with >3 pure reads for each haplotype ...", flush=True)
     df_SNP_filt = filter_SNP_using_pure_reads(pure_reads_hap1, pure_reads_hap2, df, ["hap1_chr", "hap1_refpos", "hap2_chr", "hap2_refpos"])
+    
+    
+    
+    if df_SNP_filt.empty:
+        print("[WARN] No SNPs passed the pure-read support criteria; writing headers only.", flush=True)
+
+
+        final_cols = list(df.columns) + ["is_hap1_pure", "is_hap2_pure", "is_candidate"]
+        pd.DataFrame(columns=final_cols).to_csv(f"{prefix}_final_filt.tsv", sep="\t", index=False)
+
+
+        drop_cols = ["read_id", "recurring", "hap1_pure_cov", "hap2_pure_cov", "low_coverage", "is_candidate"]
+        pd.DataFrame(columns=drop_cols).to_csv(f"{prefix}_dropped.tsv", sep="\t", index=False)
+
+
+        trans_cols = [
+            "read_id",
+            "from_hap","from_chr","from_pos",
+            "to_hap","to_chr","to_pos",
+            "pair_key",
+            "hap1_chr","hap2_chr","h1_lo","h1_hi","h2_lo","h2_hi","is_candidate",
+            "pair_read_count","recurring",
+            "hap1_pure_cov","hap2_pure_cov","low_coverage"
+        ]
+        pd.DataFrame(columns=trans_cols).to_csv(f"{prefix}_trans_pairs.tsv", sep="\t", index=False)
+
+
+        sys.exit(0)
+
+
 
     print("Recalculating haplotype ratio of filtered SNP on each read ...", flush=True)
     reads_kept_assign = haplotype_assignment(df_SNP_filt, "read_id")
